@@ -2,7 +2,7 @@
 
 Dependency checks and native package installation through `gh dependency-pulse`, written in Go.
 
-The project is currently at specification stage. Read the [new specification](doc/design/gh-dependency-pulse.md). Its editable [flyb source](doc/design-meta/app.cue) assembles the CSV inputs in `doc/design-meta/examples`.
+The project currently provides a Go CLI skeleton. Help and version output work; `check` and `install` return exit code 2 with a not-implemented diagnostic. Read the [specification](doc/design/gh-dependency-pulse.md) for the planned behavior. Its editable [flyb source](doc/design-meta/app.cue) assembles the CSV inputs in `doc/design-meta/examples`.
 
 ```sh
 flyb validate --config doc/design-meta
@@ -22,4 +22,13 @@ gh flarebyte repo update
 
 gh-flarebyte is used locally for development and repository administration. No GitHub Actions workflow is required for these local commands.
 
-Build and release settings describe the planned Go binary; those commands require the implementation and a Go module. `main.project.yaml` holds the initial development version.
+With Go 1.24.1 or later and gh-flarebyte installed, run from the repository root:
+
+```sh
+gh flarebyte test
+gh flarebyte lint
+gh flarebyte build
+go run ./cmd/gh-dependency-pulse --help
+```
+
+Build artifacts and checksums are written under `build/` for the targets in `.gh-flarebyte.cue`. `cmd/gh-dependency-pulse` owns the executable entry point; `internal/cli` owns command dispatch and tests. No external Go dependencies are needed. `main.project.yaml` holds the initial development version.

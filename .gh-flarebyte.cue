@@ -92,8 +92,9 @@ repository: {
 	}
 }
 
-// Build and release become usable once the Go CLI is implemented.
+// Build the development CLI skeleton; package operations remain unimplemented.
 build: {
+	mainPackage: "./cmd/gh-dependency-pulse"
 	mode:                "binary"
 	language:            "go"
 	outputDir:           "build"
