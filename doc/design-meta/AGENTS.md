@@ -1,6 +1,6 @@
 # Design sources
 
-Edit app.cue and examples/*.csv; regenerate doc/design/gh-dep.md with flyb. The specification is self-contained; its scope decisions record intentional exclusions from the earlier project.
+Edit app.cue and examples/*.csv; regenerate doc/design/gh-dependency-pulse.md with flyb. The specification is self-contained; its scope decisions record intentional exclusions from the earlier project.
 
 Start with examples/concepts.csv, then retrieve relevant records from the repository root:
 

@@ -1,15 +1,15 @@
 package flyb
 
 {
-  "source": "gh-dep",
-  "name": "gh-dep-design",
+  "source": "gh-dependency-pulse",
+  "name": "gh-dependency-pulse-design",
   "modules": [
     "core"
   ],
   "reports": [
     {
-      "title": "gh dep specification",
-      "filepath": "../design/gh-dep.md",
+      "title": "gh dependency-pulse specification",
+      "filepath": "../design/gh-dependency-pulse.md",
       "description": "Small shared package checks and native installation.",
       "sections": [
         {
@@ -63,7 +63,7 @@ package flyb
     {
       "name": "dep.overview",
       "title": "01 Purpose and scope",
-      "markdown": "Draft specification for a standalone Go GitHub CLI extension, executable `gh-dep`, invoked as `gh dep`. Check one direct package release using public metadata and known advisories, then optionally delegate installation. A pass means only that the stated checks completed; it does not certify safety, malware absence, runtime compatibility or transitive dependencies.\n\nThis specification is the complete requirements source for this repository. The earlier project specifications have been consolidated here and removed; the scope decisions below record intentional simplifications. No existing implementation or regression suite must be carried over. First delivery covers npm, Cargo, PyPI, Go and Maven checks; native install covers the first four. Pub and Swift are deferred to avoid bespoke metadata pipelines.",
+      "markdown": "Draft specification for a standalone Go GitHub CLI extension, executable `gh-dependency-pulse`, invoked as `gh dependency-pulse`. Check one direct package release using public metadata and known advisories, then optionally delegate installation. A pass means only that the stated checks completed; it does not certify safety, malware absence, runtime compatibility or transitive dependencies.\n\nThis specification is the complete requirements source for this repository. The earlier project specifications have been consolidated here and removed; the scope decisions below record intentional simplifications. No existing implementation or regression suite must be carried over. First delivery covers npm, Cargo, PyPI, Go and Maven checks; native install covers the first four. Pub and Swift are deferred to avoid bespoke metadata pipelines.",
       "labels": [
         "spec"
       ]
@@ -71,7 +71,7 @@ package flyb
     {
       "name": "dep.cli",
       "title": "02 Command and output contract",
-      "markdown": "```text\ngh dep check <ecosystem> <package> [--version <exact>] [--min-age-days <days>] [--json]\ngh dep install <ecosystem> <package> [--version <exact>] [--min-age-days <days>]\n```\n\nSeparate version input avoids parsing scoped npm names and Maven coordinates. Versionless input checks the provider default only. An explicit request is never replaced. Do not add alternative-version searches, `--explain`, passthrough package-manager flags or configuration files in v1. Reject unsupported flags before network or execution.\n\nText check output contains status, canonical package, exact version, age when known, reason codes and advisory IDs. `--json` emits one object with `ecosystem`, `package`, nullable `version`, `status` (`pass|review|fail`), `reasons` (code strings), `advisory_ids` and `coverage` (`direct-package-only`). Arrays are deduplicated and sorted; no timestamps or install-command envelope. Reason codes: `ADVISORY_FOUND`, `RELEASE_DEPRECATED`, `VERSION_UNAVAILABLE`, `DEFAULT_UNAVAILABLE`, `AGE_UNKNOWN`, `RELEASE_TOO_YOUNG`, `PUBLICATION_IN_FUTURE`, `METADATA_UNAVAILABLE`, `ADVISORIES_INCOMPLETE`. Multiple applicable reasons may coexist. Invalid CLI input is a stderr error without a check object.\n\nCheck exits 0 for pass, 1 for review/fail, 2 for invalid usage or unsupported operation. Install exits 1 for a blocked check or launch failure, 2 for invalid usage/unsupported operation, otherwise the native exit code; cancellation is nonzero. Install rejects `--json`. A Maven install returns unsupported with guidance to run check and install manually; it does not masquerade as a successful install.",
+      "markdown": "```text\ngh dependency-pulse check <ecosystem> <package> [--version <exact>] [--min-age-days <days>] [--json]\ngh dependency-pulse install <ecosystem> <package> [--version <exact>] [--min-age-days <days>]\n```\n\nSeparate version input avoids parsing scoped npm names and Maven coordinates. Versionless input checks the provider default only. An explicit request is never replaced. Do not add alternative-version searches, `--explain`, passthrough package-manager flags or configuration files in v1. Reject unsupported flags before network or execution.\n\nText check output contains status, canonical package, exact version, age when known, reason codes and advisory IDs. `--json` emits one object with `ecosystem`, `package`, nullable `version`, `status` (`pass|review|fail`), `reasons` (code strings), `advisory_ids` and `coverage` (`direct-package-only`). Arrays are deduplicated and sorted; no timestamps or install-command envelope. Reason codes: `ADVISORY_FOUND`, `RELEASE_DEPRECATED`, `VERSION_UNAVAILABLE`, `DEFAULT_UNAVAILABLE`, `AGE_UNKNOWN`, `RELEASE_TOO_YOUNG`, `PUBLICATION_IN_FUTURE`, `METADATA_UNAVAILABLE`, `ADVISORIES_INCOMPLETE`. Multiple applicable reasons may coexist. Invalid CLI input is a stderr error without a check object.\n\nCheck exits 0 for pass, 1 for review/fail, 2 for invalid usage or unsupported operation. Install exits 1 for a blocked check or launch failure, 2 for invalid usage/unsupported operation, otherwise the native exit code; cancellation is nonzero. Install rejects `--json`. A Maven install returns unsupported with guidance to run check and install manually; it does not masquerade as a successful install.",
       "labels": [
         "spec"
       ]

@@ -1,4 +1,4 @@
-# gh dep specification
+# gh dependency-pulse specification
 
 Small shared package checks and native installation.
 
@@ -9,8 +9,8 @@ Small shared package checks and native installation.
 #### 02 Command and output contract
 
 ```text
-gh dep check <ecosystem> <package> [--version <exact>] [--min-age-days <days>] [--json]
-gh dep install <ecosystem> <package> [--version <exact>] [--min-age-days <days>]
+gh dependency-pulse check <ecosystem> <package> [--version <exact>] [--min-age-days <days>] [--json]
+gh dependency-pulse install <ecosystem> <package> [--version <exact>] [--min-age-days <days>]
 ```
 
 Separate version input avoids parsing scoped npm names and Maven coordinates. Versionless input checks the provider default only. An explicit request is never replaced. Do not add alternative-version searches, `--explain`, passthrough package-manager flags or configuration files in v1. Reject unsupported flags before network or execution.
@@ -21,7 +21,7 @@ Check exits 0 for pass, 1 for review/fail, 2 for invalid usage or unsupported op
 
 #### 01 Purpose and scope
 
-Draft specification for a standalone Go GitHub CLI extension, executable `gh-dep`, invoked as `gh dep`. Check one direct package release using public metadata and known advisories, then optionally delegate installation. A pass means only that the stated checks completed; it does not certify safety, malware absence, runtime compatibility or transitive dependencies.
+Draft specification for a standalone Go GitHub CLI extension, executable `gh-dependency-pulse`, invoked as `gh dependency-pulse`. Check one direct package release using public metadata and known advisories, then optionally delegate installation. A pass means only that the stated checks completed; it does not certify safety, malware absence, runtime compatibility or transitive dependencies.
 
 This specification is the complete requirements source for this repository. The earlier project specifications have been consolidated here and removed; the scope decisions below record intentional simplifications. No existing implementation or regression suite must be carried over. First delivery covers npm, Cargo, PyPI, Go and Maven checks; native install covers the first four. Pub and Swift are deferred to avoid bespoke metadata pipelines.
 

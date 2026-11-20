@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  docs:
+    name: Validate specification and repository config
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version: '1.24.1'
+          cache: false
+      - name: Install pinned documentation and governance tools
+        run: |
+          go install github.com/flarebyte/baldrick-flying-buttress/cmd/flyb@v0.11.0
+          go install github.com/flarebyte/gh-flarebyte/cmd/gh-flarebyte@v0.30.0
+      - name: Validate configuration and generated specification
+        run: |
+          gh-flarebyte config validate
+          flyb validate --config doc/design-meta
+          flyb generate markdown --config doc/design-meta
+          git diff --exit-code -- doc/design
+          test -z "$(git ls-files --others --exclude-standard doc/design)"
+
+  # Add every new CI job to needs so this check covers the entire workflow.
+  ci-passed:
+    name: CI passed
+    needs: [docs]
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Require every CI job to succeed
+        env:
+          NEEDS_RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          test -n "$NEEDS_RESULTS"
+          for result in $NEEDS_RESULTS; do
+            test "$result" = success || exit 1
+          done
