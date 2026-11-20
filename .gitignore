@@ -32,3 +32,10 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# Local gh-flarebyte build and Go caches
+build/
+.gocache/
+.gomodcache/
+
+temp/
