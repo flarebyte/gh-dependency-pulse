@@ -13,6 +13,8 @@ gh dependency-pulse check <ecosystem> <package> [--version <exact>] [--min-age-d
 gh dependency-pulse install <ecosystem> <package> [--version <exact>] [--min-age-days <days>]
 ```
 
+The `<ecosystem>` argument accepts a package-manager/ecosystem selector or a language alias from the ecosystem mapping. Every supported language has one explicit default package manager. For example, `check npm lodash`, `check javascript lodash` and `check js lodash` are equivalent; `install js lodash` delegates to npm after the same check passes. Python defaults to uv: `pypi`, `python`, `py` and `uv` select the same PyPI checks and uv install command. Aliases are exact lowercase tokens and do not add support for other package managers or ecosystems. Normalize aliases to the canonical selector before checking or installing; JSON `ecosystem` and text output use the canonical selector. Java/Maven aliases still support check only. Defaults are fixed by this specification, without configuration or installed-tool discovery.
+
 Separate version input avoids parsing scoped npm names and Maven coordinates. Versionless input checks the provider default only. An explicit request is never replaced. Do not add alternative-version searches, `--explain`, passthrough package-manager flags or configuration files in v1. Reject unsupported flags before network or execution.
 
 Text check output contains status, canonical package, exact version, age when known, reason codes and advisory IDs. `--json` emits one object with `ecosystem`, `package`, nullable `version`, `status` (`pass|review|fail`), `reasons` (code strings), `advisory_ids` and `coverage` (`direct-package-only`). Arrays are deduplicated and sorted; no timestamps or install-command envelope. Reason codes: `ADVISORY_FOUND`, `RELEASE_DEPRECATED`, `VERSION_UNAVAILABLE`, `DEFAULT_UNAVAILABLE`, `AGE_UNKNOWN`, `RELEASE_TOO_YOUNG`, `PUBLICATION_IN_FUTURE`, `METADATA_UNAVAILABLE`, `ADVISORIES_INCOMPLETE`. Multiple applicable reasons may coexist. Invalid CLI input is a stderr error without a check object.
@@ -48,6 +50,7 @@ This specification is the complete requirements source for this repository. The 
 | architecture | A02 | No retained legacy modes or compatibility schemas. No repository stars, owner counts, Scorecard, identity verification, typosquatting lists, plugin framework or per-language policy branches. |
 | architecture | A03 | Only public registry packages are in scope. Pub, Swift, private registries and additional ecosystems are deferred until they can fit the shared contract. Unsupported selectors fail before network access. |
 | check | C10 | Own output must not expose credentials, raw HTTP bodies or untrusted instructions. Render upstream names and identifiers as bounded plain text with terminal control characters escaped. |
+| architecture | A04 | Each supported language has one default package manager defined in the ecosystem mapping. Accept the canonical selector, language names and listed aliases on both commands; resolve to the canonical ecosystem before package validation, provider lookup, policy and install argument construction. Preserve canonical ecosystem values in text/JSON output regardless of alias. No environment-based manager selection or fallback; missing default tools fail clearly. Maven aliases remain check-only. |
 
 ### 03 Shared implementation
 
@@ -61,17 +64,17 @@ Native command references: [npm install](https://docs.npmjs.com/cli/install/), [
 
 #### 02 Ecosystem mapping
 
-| deps_dev_system | install_arguments | osv_ecosystem | package_name | selector |
-| --- | --- | --- | --- | --- |
-| NPM | npm install --save-exact NAME@VERSION | npm | Registry name including optional scope | npm |
-| CARGO | cargo add NAME@=VERSION | crates.io | Crate name | cargo |
-| PYPI | uv add NAME==VERSION | PyPI | PEP 503 normalized distribution name | pypi |
-| GO | go get NAME@VERSION | Go | Module path, not arbitrary import path; preserve case and major-version suffix; accept exact pseudo-versions without sorting or VCS discovery | go |
-| MAVEN | Unsupported; fail before check with manual-install guidance and no generated declaration | Maven | group:artifact | maven |
+| aliases | default_package_manager | deps_dev_system | install_arguments | language | osv_ecosystem | package_name | selector |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| javascript; js; typescript; ts | npm | NPM | npm install --save-exact NAME@VERSION | JavaScript / TypeScript | npm | Registry name including optional scope | npm |
+| rust | cargo | CARGO | cargo add NAME@=VERSION | Rust | crates.io | Crate name | cargo |
+| python; py; uv | uv | PYPI | uv add NAME==VERSION | Python | PyPI | PEP 503 normalized distribution name | pypi |
+| golang | go | GO | go get NAME@VERSION | Go | Go | Module path, not arbitrary import path; preserve case and major-version suffix; accept exact pseudo-versions without sorting or VCS discovery | go |
+| java; mvn | maven (mvn) | MAVEN | Unsupported; fail before check with manual-install guidance and no generated declaration | Java | Maven | group:artifact | maven |
 
 #### 01 Shared API flow
 
-1. Validate selector, package and optional exact version with ecosystem rules. Reject control characters, option-like names and unsupported dependency forms. Normalize only as required by the ecosystem.
+1. Resolve a supported canonical selector or listed alias using the ecosystem mapping and its default package manager, then validate package and optional exact version with ecosystem rules. Reject control characters, option-like names and unsupported dependency forms. Normalize only as required by the ecosystem.
 2. With no exact version, GET deps.dev `/v3/systems/{system}/packages/{name}` and select its sole marked default. Missing or ambiguous default yields review. No version sorting or stable-release search.
 3. GET `/v3/systems/{system}/packages/{name}/versions/{version}`. Require the returned canonical identity to match the requested normalized identity; conflicting identities yield `METADATA_UNAVAILABLE`. Use `publishedAt` and `isDeprecated` where supplied; absent deprecation evidence does not establish absence of withdrawal. A not-found exact version yields `VERSION_UNAVAILABLE`.
 4. POST OSV `/v1/query` with `package.name`, mapped `package.ecosystem` and the exact `version`; follow pagination. Use the exact-version response rather than implementing advisory range evaluation. Query only when a release identity is established.
@@ -100,6 +103,7 @@ Provider coverage and freshness limit every result. deps.dev does not index ever
 | install | Progress reaches its native stream before exit; no whole-process buffering | T11 | Native stub writes progress then waits for stdin before exit |
 | check | Own diagnostics omit credentials and raw bodies; identifiers cannot inject terminal instructions | T12 | Credential-bearing provider error or terminal controls in upstream identifiers |
 | check | Same package-only result as inside a project; no local tool executes | T13 | Check outside Git with no manifest or lockfile and no native tool installed |
+| architecture | Equivalent normalized input yields identical provider requests, canonical output, policy and native argv; Java/Maven aliases reject install before network or execution; unknown selectors fail before network | T14 | Canonical selectors and every listed language/package-manager alias on check and install |
 
 ### 05 Scope decisions
 

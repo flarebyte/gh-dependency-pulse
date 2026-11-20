@@ -1,6 +1,6 @@
-selector,deps_dev_system,osv_ecosystem,package_name,install_arguments
-npm,NPM,npm,Registry name including optional scope,npm install --save-exact NAME@VERSION
-cargo,CARGO,crates.io,Crate name,cargo add NAME@=VERSION
-pypi,PYPI,PyPI,PEP 503 normalized distribution name,uv add NAME==VERSION
-go,GO,Go,"Module path, not arbitrary import path; preserve case and major-version suffix; accept exact pseudo-versions without sorting or VCS discovery",go get NAME@VERSION
-maven,MAVEN,Maven,group:artifact,Unsupported; fail before check with manual-install guidance and no generated declaration
+selector,deps_dev_system,osv_ecosystem,package_name,install_arguments,language,default_package_manager,aliases
+npm,NPM,npm,Registry name including optional scope,npm install --save-exact NAME@VERSION,JavaScript / TypeScript,npm,javascript; js; typescript; ts
+cargo,CARGO,crates.io,Crate name,cargo add NAME@=VERSION,Rust,cargo,rust
+pypi,PYPI,PyPI,PEP 503 normalized distribution name,uv add NAME==VERSION,Python,uv,python; py; uv
+go,GO,Go,"Module path, not arbitrary import path; preserve case and major-version suffix; accept exact pseudo-versions without sorting or VCS discovery",go get NAME@VERSION,Go,go,golang
+maven,MAVEN,Maven,group:artifact,Unsupported; fail before check with manual-install guidance and no generated declaration,Java,maven (mvn),java; mvn
