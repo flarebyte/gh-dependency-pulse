@@ -1,0 +1,14 @@
+id,scenario,expected,concept
+T01,Same complete clean mature fixture for each supported selector,Identical pass policy and result shape,check
+T02,Advisory or deprecated release; also missing evidence,Fail; no process starts,check
+T03,Too young or missing date; zero age option,Review normally; zero skips only age rule,check
+T04,Missing default; exact release supplied,Review without default; exact request checks only that release,check
+T05,"Timeout, bad JSON, oversized data, OSV token loop or page cap",Review; never treat incomplete data as clean,check
+T06,Withdrawn and duplicate OSV records across pages,Withdrawn ignored; active IDs deduplicated and sorted,check
+T07,"Scoped npm, PyPI normalization, Go path and Maven coordinate",Correct encoded API identity; no shared lexical version sorting,architecture
+T08,Pass then install with stub executable for each native adapter,"Exact argv, current directory, inherited stdin and separate raw stdout/stderr; no extra check",install
+T09,"Review, fail, missing tool, native error or cancellation",No launch for blocked check; appropriate nonzero status otherwise,install
+T10,"Invalid input, shell metacharacters, unsupported selector or Maven install",No shell evaluation or file changes; unsupported operations fail before network,install
+T11,Native stub writes progress then waits for stdin before exit,Progress reaches its native stream before exit; no whole-process buffering,install
+T12,Credential-bearing provider error or terminal controls in upstream identifiers,Own diagnostics omit credentials and raw bodies; identifiers cannot inject terminal instructions,check
+T13,Check outside Git with no manifest or lockfile and no native tool installed,Same package-only result as inside a project; no local tool executes,check
