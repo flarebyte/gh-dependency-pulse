@@ -10,9 +10,10 @@ sync: {
 }
 
 repository: {
+	// Require PRs and the Actions "CI passed" check; block force pushes and deletion.
 	branchProtection: {
-		enabled: true
-		allowAdminCIBypass: true
+		enabled:            true
+		allowAdminCIBypass: true // Admin CI bypass applies through PRs only.
 	}
 	description:   "Dependency check and installation across multiple languages"
 	defaultBranch: "main"
@@ -26,52 +27,52 @@ repository: {
 		"flarebyte",
 	]
 	labels: [
-  {
-    "color": "d73a4a",
-    "description": "Something isn't working",
-    "name": "bug"
-  },
-  {
-    "color": "0075ca",
-    "description": "Improvements or additions to documentation",
-    "name": "documentation"
-  },
-  {
-    "color": "cfd3d7",
-    "description": "This issue or pull request already exists",
-    "name": "duplicate"
-  },
-  {
-    "color": "a2eeef",
-    "description": "New feature or request",
-    "name": "enhancement"
-  },
-  {
-    "color": "7057ff",
-    "description": "Good for newcomers",
-    "name": "good first issue"
-  },
-  {
-    "color": "008672",
-    "description": "Extra attention is needed",
-    "name": "help wanted"
-  },
-  {
-    "color": "e4e669",
-    "description": "This doesn't seem right",
-    "name": "invalid"
-  },
-  {
-    "color": "d876e3",
-    "description": "Further information is requested",
-    "name": "question"
-  },
-  {
-    "color": "ffffff",
-    "description": "This will not be worked on",
-    "name": "wontfix"
-  }
-]
+		{
+			color:      "d73a4a"
+			description: "Something isn't working"
+			name:       "bug"
+		},
+		{
+			color:      "0075ca"
+			description: "Improvements or additions to documentation"
+			name:       "documentation"
+		},
+		{
+			color:      "cfd3d7"
+			description: "This issue or pull request already exists"
+			name:       "duplicate"
+		},
+		{
+			color:      "a2eeef"
+			description: "New feature or request"
+			name:       "enhancement"
+		},
+		{
+			color:      "7057ff"
+			description: "Good for newcomers"
+			name:       "good first issue"
+		},
+		{
+			color:      "008672"
+			description: "Extra attention is needed"
+			name:       "help wanted"
+		},
+		{
+			color:      "e4e669"
+			description: "This doesn't seem right"
+			name:       "invalid"
+		},
+		{
+			color:      "d876e3"
+			description: "Further information is requested"
+			name:       "question"
+		},
+		{
+			color:      "ffffff"
+			description: "This will not be worked on"
+			name:       "wontfix"
+		},
+	]
 	features: {
 		issues:                        true
 		wiki:                          false
@@ -93,10 +94,10 @@ repository: {
 
 // Build and release become usable once the Go CLI is implemented.
 build: {
-	mode: "binary"
-	language:     "go"
-	outputDir:    "build"
-	checksumFile: "build/checksums.txt"
+	mode:                "binary"
+	language:            "go"
+	outputDir:           "build"
+	checksumFile:        "build/checksums.txt"
 	artifactTargetSuffix: true
 	targets: [
 		"linux-amd64",
@@ -106,16 +107,16 @@ build: {
 }
 
 go: {
-	cacheDir: "./.gocache"
+	cacheDir:   "./.gocache"
 	modCacheDir: "./.gomodcache"
-	toolchain: "local"
+	toolchain:  "local"
 }
 
 release: {
 	includeArtifacts: true
-	versionSource:    "main.project.yaml"
-	tagPrefix:        "v"
-	notesMode:        "generate-notes"
-	artifactDir:      "build"
+	versionSource:   "main.project.yaml"
+	tagPrefix:       "v"
+	notesMode:       "generate-notes"
+	artifactDir:     "build"
 	includeChecksums: true
 }

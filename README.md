@@ -20,6 +20,6 @@ gh flarebyte repo audit
 gh flarebyte repo update
 ```
 
-The default branch requires pull requests and the GitHub Actions `CI passed` check; force pushes and deletion are blocked. Admins may bypass CI through a pull request. CI validates the specification and checks that generated documentation is current. Add future CI jobs to the aggregate check's dependencies.
+gh-flarebyte is used locally for development and repository administration. No GitHub Actions workflow is required for these local commands.
 
 Build and release settings describe the planned Go binary; those commands require the implementation and a Go module. `main.project.yaml` holds the initial development version.
