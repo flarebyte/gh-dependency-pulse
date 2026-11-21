@@ -1,0 +1,9 @@
+manager,executable,availability_check,macos_install_hint,official_install_url
+npm,npm,Resolve npm on PATH,Install the latest stable Node.js with npm using a Node version manager; follow the official macOS setup guide.,https://docs.npmjs.com/downloading-and-installing-node-js-and-npm/
+Cargo,cargo,Resolve cargo on PATH,Install the latest stable Rust toolchain with rustup; Cargo is included.,https://doc.rust-lang.org/cargo/getting-started/installation.html
+uv,uv,Resolve uv on PATH,With Homebrew installed: brew install uv. Otherwise use the official standalone installer.,https://docs.astral.sh/uv/getting-started/installation/
+Go,go,Resolve go on PATH,Download and run the latest stable Go macOS installer (.pkg) for your Mac architecture.,https://go.dev/doc/install
+Dart Pub,dart,Resolve dart on PATH; Pub is bundled with Dart,With Homebrew installed: brew tap dart-lang/dart then brew install dart. Otherwise follow the official SDK installation guide.,https://dart.dev/get-dart
+SwiftPM,swift,Resolve swift on PATH; SwiftPM is bundled with Swift,Install the latest stable Swift toolchain using Swiftly via the official macOS guide; SwiftPM is included.,https://www.swift.org/install/macos/
+Gradle wrapper,./gradlew,Require executable committed wrapper and its JAR/properties in the supported project root; resolve java on PATH,"Restore the project Gradle wrapper from version control; if absent, have the project maintainer generate and commit it. Install a current compatible JDK if Java is missing.",https://docs.gradle.org/current/userguide/gradle_wrapper.html
+Maven,mvn,Resolve mvn and java on PATH,"Install a current compatible JDK and Maven; with Homebrew installed, brew install maven is an option.",https://maven.apache.org/install.html
