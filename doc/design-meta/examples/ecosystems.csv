@@ -1,6 +1,9 @@
-selector,deps_dev_system,osv_ecosystem,package_name,install_arguments,language,default_package_manager,aliases
-npm,NPM,npm,Registry name including optional scope,npm install --save-exact NAME@VERSION,JavaScript / TypeScript,npm,javascript; js; typescript; ts
-cargo,CARGO,crates.io,Crate name,cargo add NAME@=VERSION,Rust,cargo,rust
-pypi,PYPI,PyPI,PEP 503 normalized distribution name,uv add NAME==VERSION,Python,uv,python; py; uv
-go,GO,Go,"Module path, not arbitrary import path; preserve case and major-version suffix; accept exact pseudo-versions without sorting or VCS discovery",go get NAME@VERSION,Go,go,golang
-maven,MAVEN,Maven,group:artifact,Unsupported; fail before check with manual-install guidance and no generated declaration,Java,maven (mvn),java; mvn
+selector,deps_dev_system,osv_ecosystem,package_name,install_arguments,language,default_package_manager,aliases,canonical_ecosystem
+npm,NPM,npm,Registry name including optional scope,npm install --save-exact NAME@VERSION,JavaScript / TypeScript,npm,javascript; js; typescript; ts,npm
+cargo,CARGO,crates.io,Crate name,cargo add NAME@=VERSION,Rust,cargo,rust,cargo
+pypi,PYPI,PyPI,PEP 503 normalized distribution name,uv add NAME==VERSION,Python,uv,python; py; uv,pypi
+go,GO,Go,"Module path, not arbitrary import path; preserve case and major-version suffix; accept exact pseudo-versions without sorting or VCS discovery",go get NAME@VERSION,Go,go,golang,go
+maven,MAVEN,Maven,group:artifact,Planned optional Maven adapter; unsupported until POM integration is specified and tested,Java,maven (mvn),java; mvn,maven
+pub,,Pub,Public pub.dev package name,dart pub add NAME:VERSION,Dart,dart pub,dart,pub
+swift,,SwiftURL,Canonical public repository URL; exact version/tag mapping must be specified,Planned SwiftPM exact dependency addition and resolution; validate supported toolchain,Swift,Swift Package Manager,swiftpm; spm,swift
+gradle,MAVEN,Maven,group:artifact,Planned Gradle wrapper adapter; exact declaration integration must be specified,Kotlin,Gradle wrapper,kotlin; kt,maven

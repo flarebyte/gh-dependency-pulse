@@ -9,6 +9,8 @@ flyb validate --config doc/design-meta
 flyb generate markdown --config doc/design-meta
 ```
 
+The [language support matrix](doc/design-meta/examples/language-support.csv) records required and optional check/install support for 20 languages, with separate adapter effort estimates. These are planned capabilities, not implemented support.
+
 The specification is self-contained. Its scope decisions explain the simplifications made when consolidating the earlier project requirements.
 
 Repository settings are managed by [`.gh-flarebyte.cue`](.gh-flarebyte.cue) using gh-flarebyte v0.30.0:

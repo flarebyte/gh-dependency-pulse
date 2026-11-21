@@ -1,0 +1,21 @@
+language,aliases,ecosystem,default_package_manager,check_priority,install_priority,check_adapter_effort,install_adapter_effort,check_reuse,install_work,decision_notes
+JavaScript,javascript; js; npm,npm,npm,must,must,1-mapping,1-mapping,deps.dev NPM + OSV npm,Exact npm argv,Shared npm adapter with TypeScript
+TypeScript,typescript; ts,npm,npm,must,must,0-reuse,0-reuse,Reuse JavaScript checks,Reuse npm argv,No TypeScript-specific policy
+Python,python; py; pypi; uv,pypi,uv,must,must,1-mapping,1-mapping,deps.dev PYPI + OSV PyPI,Exact uv add argv,Existing normalization rules
+Rust,rust; cargo,cargo,cargo,must,must,1-mapping,1-mapping,deps.dev CARGO + OSV crates.io,Exact cargo add argv,No Rust-specific policy
+Go,go; golang,go,go,must,must,1-mapping,1-mapping,deps.dev GO + OSV Go,Exact go get argv,Preserve module identity and pseudo-versions
+Dart,dart; pub,pub,dart pub,must,must,2-adapter,1-mapping,New pub.dev metadata adapter + OSV Pub,dart pub add NAME:VERSION,Must establish publication date and default-release rules
+Swift,swift; swiftpm; spm,swift,Swift Package Manager,must,must,3-design,2-adapter,Public repository release metadata + OSV SwiftURL,SwiftPM dependency addition and resolution,Define canonical URL/tag/version/date mapping and supported SwiftPM version; no shell or executable manifests during check
+Kotlin,kotlin; kt; gradle,maven,Gradle wrapper,must,must,0-reuse,3-design,Reuse Maven group:artifact checks,Bounded Gradle dependency declaration adapter,Do not confuse Maven registry with Maven install tool; design exact dependency insertion before delivery
+Java,java; maven; mvn,maven,Maven,must,nice-to-have,1-mapping,3-design,deps.dev MAVEN + OSV Maven,POM dependency declaration and native resolution,Retain existing check scope; check-only is acceptable until install adapter is designed
+C#,csharp; cs; nuget,nuget,dotnet CLI,nice-to-have,nice-to-have,1-mapping,1-mapping,deps.dev NUGET + OSV NuGet,Exact dotnet package-add argv,Good candidate after NuGet identity and date fixtures
+F#,fsharp; fs,nuget,dotnet CLI,nice-to-have,nice-to-have,0-reuse,0-reuse,Reuse C# NuGet checks,Reuse dotnet adapter,Incremental estimate assumes NuGet/dotnet adapter exists
+Ruby,ruby; gem; rubygems,rubygems,RubyGems,nice-to-have,nice-to-have,1-mapping,1-mapping,deps.dev RUBYGEMS + OSV RubyGems,Exact gem install argv,Document environment installation scope; no Bundler project support implied
+PHP,php; composer,packagist,Composer,nice-to-have,nice-to-have,2-adapter,1-mapping,New Packagist metadata adapter + OSV Packagist,Exact composer require argv,Provider adapter required despite simple install mapping
+Scala,scala; sbt,maven,sbt,nice-to-have,nice-to-have,0-reuse,3-design,Reuse Maven checks with exact published artifact coordinates,sbt build dependency declaration,No Scala binary-version suffix inference
+C,c,conan,Conan,nice-to-have,nice-to-have,3-design,2-adapter,Reuse C++ provider only after Conan/advisory identity is established,Reuse Conan reference handling with C project integration,No universal C registry; source-level Git coverage is not automatically Conan release coverage
+Elixir,elixir; mix,hex,Mix,nice-to-have,nice-to-have,2-adapter,2-adapter,New Hex metadata adapter + OSV Hex,mix.exs dependency declaration and native resolution,No evaluation of project code during check
+Erlang,erlang; rebar3,hex,rebar3,nice-to-have,nice-to-have,0-reuse,2-adapter,Reuse Elixir Hex checks once implemented,rebar.config dependency declaration,Different install adapter from Elixir
+R,r; cran,cran,R install.packages,nice-to-have,nice-to-have,2-adapter,3-design,New CRAN metadata adapter + OSV R identity validation,Exact archived release installation design,Default install.packages does not itself express arbitrary exact versions
+Julia,julia,julia,Julia Pkg,nice-to-have,nice-to-have,2-adapter,2-adapter,New General registry metadata adapter + OSV Julia,Exact Pkg add invocation via fixed program and argv,Require canonical UUID and reliable release publication evidence
+C++,cpp; cxx; conan,conan,Conan,nice-to-have,nice-to-have,3-design,2-adapter,No assumed deps.dev/OSV Conan identity mapping,Exact Conan reference and project integration,Registry identity to advisory identity is an unresolved prerequisite; no guessed pass
