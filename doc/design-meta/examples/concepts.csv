@@ -2,3 +2,4 @@ id,description,parent
 check,Shared package check,
 install,Native package manager delegation,
 architecture,Go implementation boundaries,
+list,Direct dependency listing and optional checks,
