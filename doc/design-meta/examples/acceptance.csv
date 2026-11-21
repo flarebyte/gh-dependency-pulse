@@ -1,31 +1,34 @@
 id,scenario,expected,concept
-T01,Same complete clean mature fixture for each supported selector,Identical pass policy and result shape,check
-T02,Advisory or deprecated release; also missing evidence,Fail; no process starts,check
+T01,Clean mature release for each supported selector,Pass with the shared result schema and exit 0,check
+T02,"Applicable advisory or deprecation, with or without incomplete evidence",Fail takes precedence over review and blocks installation,check
 T03,Too young or missing date; zero age option,Review normally; zero skips only age rule,check
-T04,Missing default; exact release supplied,Review without default; exact request checks only that release,check
+T04,"Provider default missing, with and without an explicit version",Versionless check reviews with DEFAULT_UNAVAILABLE; exact check evaluates the requested release,check
 T05,"Timeout, bad JSON, oversized data, OSV token loop or page cap",Review; never treat incomplete data as clean,check
 T06,Withdrawn and duplicate OSV records across pages,Withdrawn ignored; active IDs deduplicated and sorted,check
-T07,"Scoped npm, PyPI normalization, Go path and Maven coordinate",Correct encoded API identity; no shared lexical version sorting,architecture
+T07,"Scoped npm name, PyPI normalization, Go module path and Maven coordinate",Provider receives the normalized and encoded identity,architecture
 T08,Pass then install with stub executable for each native adapter,"Exact argv, current directory, inherited stdin and separate raw stdout/stderr; no extra check",install
-T09,"Review, fail, missing tool, native error or cancellation",No launch for blocked check; appropriate nonzero status otherwise,install
+T09,"Blocked check, manager launch failure, native exit or cancellation",Blocked check and launch failure exit 1; preserve native exit status; cancellation is nonzero,install
 T10,"Invalid input, shell metacharacters, unsupported selector or unavailable install adapter",No shell evaluation or file changes; unsupported operations fail before network,install
 T11,Native stub writes progress then waits for stdin before exit,Progress reaches its native stream before exit; no whole-process buffering,install
 T12,Credential-bearing provider error or terminal controls in upstream identifiers,Own diagnostics omit credentials and raw bodies; identifiers cannot inject terminal instructions,check
 T13,"Check outside Git without project config, manifest, lockfile or native tool",Built-in age/Markdown defaults and normal shared package-only checks; no local tool executes,check
-T14,Canonical selectors and every listed language/package-manager alias on check and install,Equivalent aliases yield identical check requests/results and manager-specific native argv; Kotlin and Java share Maven checks but keep distinct install intent; unavailable operations fail before network,architecture
-T15,All must-have language check/install capabilities in the matrix,Same flags and result/exit semantics; fixture-backed identity/date/advisory evidence; exact checked dependency added by correct default manager; skeleton stubs do not satisfy delivery,architecture
-T16,Optional shared-ecosystem check support with no install adapter,Check succeeds under normal shared evidence policy; install exits 2 before check/network/mutation; adding a language alias introduces no policy fork,architecture
-T17,Pub/Swift missing release date or default; Swift ambiguous URL/tag/version identity,"Missing evidence yields review and blocks install; invalid identity is rejected; no fallback, project execution or fabricated clean result",check
-T18,Kotlin/Gradle or Swift native integration with exact checked version,"Stub/fixture tests verify declaration edits where needed, preservation of unrelated content, correct manager invocation and exit propagation; no check duplication or manual-only success",install
+T14,"Language and manager aliases across check, install and list",Equivalent aliases share results and adapters; Kotlin and Java share Maven checks but retain separate install and manifest adapters,architecture
+T15,Each required check and install capability,Shared check contract and exact-version installation with the default manager,architecture
+T16,Supported check with no install adapter,Install exits 2 before network access or mutation,architecture
+T17,Pub or Swift metadata missing a required date or default; ambiguous Swift release identity,Missing or ambiguous provider evidence yields review; invalid user input exits 2,check
+T18,Exact-version Kotlin and Swift installs,Invoke the correct manager and preserve unrelated declaration content,install
 T19,"Missing, partial and complete project defaults; explicit overrides including zero and markdown",Built-ins fill absent fields; file supplies defaults; explicit flags win; --json and --format json agree and conflicting flags exit 2,check
 T20,Nested cwd with nearest config; multiple ancestors; .git file/directory boundary; standalone cwd with ancestor config but no Git boundary,Inside Git use nearest file up to boundary inclusive; outside Git use only cwd and ignore ancestor configs; no merge; native cwd stays at invocation directory,architecture
 T21,Unreadable or invalid CUE; unknown fields; negative/fractional age; invalid format; imports or nonconcrete values,Exit 2 before network/execution/mutation even with overriding CLI flags; help/version still work without loading config,architecture
 T22,Configured format json on install and explicit install formatting flags,Configured age applies to the one pre-install check; configured format is ignored; native streams remain raw; explicit --json or --format exits 2,install
 T23,"Passing check followed by missing manager, host executable, wrapper or known runtime",Exit 1 before any install mutation; no automatic installation or fallback; stderr identifies missing component and gives brief macOS guidance plus an official URL; aliases share the same guidance,install
-T24,Older installed manager or pinned wrapper; explicit older package version or too-young latest package,"No tool-version gate, forced upgrade or latest-release request; respect native/project constraints and explicit package identity; shared age policy still applies",install
-T25,Check-only invocation or blocked pre-install check with no manager installed,No local manager lookup/execution required by check; blocked package result cannot launch manager preflight/delegation or mutate declarations,check
-T26,Mixed Go/Python repo with parent manifests and a nested module,Each list selector reads only its own invocation-relative inputs; missing local manifest exits 2; no ancestor/subproject scan,list
-T27,"Direct declarations and transitives in lockfile; exact pins, ranges, conflicting or multiple locked versions; prod/dev scopes",Only direct rows; exact versions carry provenance and unresolved rows remain visible; JSON/Markdown/table agree,list
-T28,Gradle root declarations using the default version catalog; Swift computed declarations; empty manifest,Only referenced catalog entries become rows; unsupported dynamic syntax reports partial; valid empty manifest returns empty success,list
-T29,"Offline list and list --check with duplicate exact releases, unresolved ranges and advisory titles","Offline mode makes no requests; enrichment deduplicates checks, displays shared age/latest/verdict/titles, and preserves rows with review/fail at exit 1",list
-T30,Exact check with unavailable latest metadata or untitled advisory,Latest remains null without changing verdict; untitled advisory retains ID; latest metadata never substitutes checked version,check
+T24,Older installed manager or pinned wrapper,No tool version gate or upgrade; package selection and age policy are unchanged,install
+T25,Standalone check or blocked install with no manager installed,Neither path looks up or starts a native tool,check
+T26,Go and Python manifests in a mixed repo and nested module,Read only the selected invocation-relative inputs; missing local manifest exits 2,list
+T27,"Direct and transitive lock entries, ranges, conflicts and distinct scopes",Only direct rows; exact versions include provenance; unknowns and scopes agree across formats,list
+T28,"Gradle catalog references, computed Swift declarations and empty manifests",List only referenced catalog entries; mark unenumerable declarations partial and exit 1; complete empty list exits 0,list
+T29,Offline list and list --check with repeated exact releases and unresolved rows,"Plain list makes no requests; checked list reuses verdicts, age, latest and titles; review rows are retained at exit 1",list
+T30,Exact check with unavailable latest metadata or untitled advisory,Latest is null without changing the verdict; advisory ID remains,check
+T31,Incomplete release or advisory evidence without an advisory or deprecation finding,Review and block installation,check
+T32,Configured JSON and explicit table for list; standalone check with table; list age flag without --check,List accepts table override; unsupported flag combinations exit 2,list
+T33,"List --check with unsupported source, conflicting lock evidence or failing provider",Keep all rows; unresolved or unsupported declarations make no requests; provider failure follows the shared verdict contract,list
