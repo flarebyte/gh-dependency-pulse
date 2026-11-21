@@ -1,9 +1,9 @@
 id,scenario,expected,concept
 T01,Clean mature release for each supported selector,Pass with the shared result schema and exit 0,check
-T02,"Applicable advisory or deprecation, with or without incomplete evidence",Fail takes precedence over review and blocks installation,check
+T02,"Applicable advisory, confirmed deprecation or confirmed retraction, with or without incomplete evidence",Fail takes precedence over review and blocks installation,check
 T03,Too young or missing date; zero age option,Review normally; zero skips only age rule,check
 T04,"Provider default missing, with and without an explicit version",Versionless check reviews with DEFAULT_UNAVAILABLE; exact check evaluates the requested release,check
-T05,"Timeout, bad JSON, oversized data, OSV token loop or page cap",Review; never treat incomplete data as clean,check
+T05,"Timeout, malformed or oversized response, or OSV pagination failure",Required metadata failures yield METADATA_UNAVAILABLE; incomplete advisory queries yield ADVISORIES_INCOMPLETE,check
 T06,Withdrawn and duplicate OSV records across pages,Withdrawn ignored; active IDs deduplicated and sorted,check
 T07,"Scoped npm name, PyPI normalization, Go module path and Maven coordinate",Provider receives the normalized and encoded identity,architecture
 T08,Pass then install with stub executable for each native adapter,"Exact argv, current directory, inherited stdin and separate raw stdout/stderr; no extra check",install
@@ -29,6 +29,9 @@ T27,"Direct and transitive lock entries, ranges, conflicts and distinct scopes",
 T28,"Gradle catalog references, computed Swift declarations and empty manifests",List only referenced catalog entries; mark unenumerable declarations partial and exit 1; complete empty list exits 0,list
 T29,Offline list and list --check with repeated exact releases and unresolved rows,"Plain list makes no requests; checked list reuses verdicts, age, latest and titles; review rows are retained at exit 1",list
 T30,Exact check with unavailable latest metadata or untitled advisory,Latest is null without changing the verdict; advisory ID remains,check
-T31,Incomplete release or advisory evidence without an advisory or deprecation finding,Review and block installation,check
+T31,"Incomplete evidence without an advisory, deprecation or retraction finding",Review and block installation,check
 T32,Configured JSON and explicit table for list; standalone check with table; list age flag without --check,List accepts table override; unsupported flag combinations exit 2,list
 T33,"List --check with unsupported source, conflicting lock evidence or failing provider",Keep all rows; unresolved or unsupported declarations make no requests; provider failure follows the shared verdict contract,list
+T34,Exact release not found versus required metadata endpoint timing out or returning an invalid response,Definitive not-found yields VERSION_UNAVAILABLE; lookup failure yields METADATA_UNAVAILABLE,check
+T35,"Exact Pub release is retracted, with or without an incomplete advisory query",RELEASE_RETRACTED yields fail and blocks installation; absent retraction evidence does not emit the code,check
+T36,OSV page contains no findings and carries a continuation token,Continue until completion; a later active finding yields fail; an unfinished query yields review in the absence of a fail reason,check

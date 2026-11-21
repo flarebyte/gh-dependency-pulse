@@ -11,13 +11,14 @@ Small shared package checks and native installation.
 ```text
 gh dependency-pulse check <ecosystem> <package> [--version <exact>] [--min-age-days <days>] [--format json|markdown | --json]
 gh dependency-pulse install <ecosystem> <package> [--version <exact>] [--min-age-days <days>]
+gh dependency-pulse list <ecosystem> [--check [--min-age-days <days>]] [--format json|markdown|table]
 ```
 
 Selectors use the same lowercase language and manager aliases across commands. For example, `check npm lodash`, `check javascript lodash` and `check js lodash` are equivalent. Kotlin/Gradle and Java/Maven share the canonical `maven` check ecosystem but retain distinct managers and manifest adapters. The flags, result schema and policy are the same across languages.
 
 Check uses the requested exact version or the provider default when the version is omitted. The result uses the canonical ecosystem regardless of alias.
 
-Markdown summarizes the same check result as JSON. `--format json` (or its `--json` alias) emits one object with `ecosystem`, `package`, nullable `version`, `status` (`pass|review|fail`), `reasons` (code strings), `advisory_ids`, `age_days`, `latest_version`, `advisories` and `coverage` (`direct-package-only`). Arrays are deduplicated and sorted. Reason codes: `ADVISORY_FOUND`, `RELEASE_DEPRECATED`, `VERSION_UNAVAILABLE`, `DEFAULT_UNAVAILABLE`, `AGE_UNKNOWN`, `RELEASE_TOO_YOUNG`, `PUBLICATION_IN_FUTURE`, `METADATA_UNAVAILABLE`, `ADVISORIES_INCOMPLETE`.
+Markdown summarizes the same check result as JSON. `--format json` (or its `--json` alias) emits one object with `ecosystem`, `package`, nullable `version`, `status` (`pass|review|fail`), `reasons` (code strings), `advisory_ids`, `age_days`, `latest_version`, `advisories` and `coverage` (`direct-package-only`). Arrays are deduplicated and sorted. The reason code table defines each trigger. Multiple reasons may apply, and fail takes precedence over review.
 
 Check exits 0 for pass and 1 for review or fail. Install runs the same check once and delegates only an exact release that passes. A blocked check or launch failure exits 1; a launched manager's exit status is preserved, and cancellation is nonzero. Install preserves native stdout and stderr and rejects formatting flags.
 
@@ -46,10 +47,6 @@ format: "json"
 
 #### 05 List direct project dependencies
 
-```text
-gh dependency-pulse list <ecosystem> [--check [--min-age-days <days>]] [--format json|markdown|table]
-```
-
 Select one manifest adapter with the same aliases as check and install. For example, `list go` and `list python` can inspect the same directory independently.
 
 Read the selected adapter’s conventional files relative to the invocation directory, as listed in the manifest matrix. Exclude ancestors, workspaces, subprojects, installed environments and links outside that directory. If both Gradle build files exist, report ambiguity and exit 2. Parse declarations statically. Report a partial listing if some declarations cannot be enumerated. Missing, unreadable or invalid required manifests exit 2. Config discovery follows its separate Git boundary rules.
@@ -62,7 +59,7 @@ JSON emits one object with `ecosystem`, `manifest` (relative path), `complete`, 
 
 Plain list is offline. With `--check`, reuse the standalone check once per unique eligible public package and exact release. `--min-age-days` is accepted only with `--check`. Unresolved versions and unsupported sources yield review without provider requests for those rows. Send only validated public package identities. Bound enrichment and concurrency, respect cancellation, and retain other rows if a check fails. Listing never runs project code or a package manager.
 
-With `--check`, add `status`, `reasons`, `age_days`, `latest_version` and `advisories` to each row. Use `EXACT_VERSION_UNKNOWN` and `UNSUPPORTED_SOURCE` for list-only review reasons. Unavailable age and latest version are null, and unavailable advisory entries use an empty array. Show Pass, Review or Fail in human output.
+With `--check`, add `status`, `reasons`, `age_days`, `latest_version` and `advisories` to each row. The reason code table identifies list-only codes. Unavailable age and latest version are null, and unavailable advisory entries use an empty array. Show Pass, Review or Fail in human output.
 
 Exit 0 for a complete listing with every requested check passing (or no checks requested). Exit 1 for a partial listing or any review/fail row when checks were requested. Preserve the listing on exit 1. Exit 2 for command, configuration or manifest errors that prevent listing.
 
@@ -74,6 +71,23 @@ The language support matrix defines required and optional check/install capabili
 
 ### 02 Check and install rules
 
+#### Reason codes
+
+| code | scope | trigger | verdict |
+| --- | --- | --- | --- |
+| ADVISORY_FOUND | shared | A known applicable advisory has not been withdrawn. | fail |
+| RELEASE_DEPRECATED | shared | The metadata provider confirms the checked release is deprecated. | fail |
+| RELEASE_RETRACTED | shared | The metadata provider explicitly marks the exact release as retracted. | fail |
+| VERSION_UNAVAILABLE | shared | The provider definitively reports that it does not have the exact release. | review |
+| DEFAULT_UNAVAILABLE | shared | A conclusive provider response establishes no unambiguous default for a versionless check. | review |
+| AGE_UNKNOWN | shared | The age rule requires a publication date and none is available. | review |
+| RELEASE_TOO_YOUNG | shared | The release is younger than the configured minimum age. | review |
+| PUBLICATION_IN_FUTURE | shared | The provider reports a publication date after the check time. | review |
+| METADATA_UNAVAILABLE | shared | A required metadata lookup fails or returns malformed or conflicting release data. | review |
+| ADVISORIES_INCOMPLETE | shared | The advisory query did not return a complete result. | review |
+| EXACT_VERSION_UNKNOWN | list-only | The declaration has no unambiguous exact version to check. | review |
+| UNSUPPORTED_SOURCE | list-only | The declaration does not identify a supported public package source. | review |
+
 #### Rules
 
 | concept | id | requirement |
@@ -82,7 +96,7 @@ The language support matrix defines required and optional check/install capabili
 | check | C02 | An explicit --version must identify one release; reject ranges, moving tags and filesystem dependencies. Swift maps an exact version to one verified release tag; do not accept arbitrary branch/tag selectors. Canonical public Swift package URLs are identity input only. Otherwise use only the declared metadata provider default; if absent return review. Never search for an older or alternative release. |
 | check | C03 | Fetch metadata through the single declared ecosystem adapter (deps.dev by default; Pub and Swift require dedicated adapters) and query OSV for the canonical ecosystem/name/version. Never execute a package manager or project code during check. |
 | check | C04 | Built-in minimum age is 14 elapsed UTC days. Optional .gh-dependency-pulse.cue supplies minAgeDays for check, the pre-install check and list --check; explicit --min-age-days overrides it, including zero. Require a nonnegative integer; zero disables age checking only. Check remains usable without configuration or Git. |
-| check | C05 | Known applicable non-withdrawn advisories or deps.dev isDeprecated=true yield fail. This is an upstream deprecation signal; do not claim comprehensive yanking or retraction coverage. |
+| check | C05 | An applicable non-withdrawn advisory or explicit provider confirmation of deprecation or retraction of the exact release yields fail. Missing lifecycle metadata does not establish that the release is active. |
 | check | C06 | Missing release/default, missing required date, future date, too-young release, incomplete response or provider failure yields review. No registry fallback chain. |
 | check | C07 | Pass requires confirmed release metadata, satisfaction of the enabled age rule and a complete OSV query with no active findings. Fail takes precedence over review; review takes precedence over pass. Both fail and review block install. |
 | check | C08 | Follow OSV page tokens up to 10 pages with repeated-token detection; any incomplete query yields review unless a fail is already known. Ignore withdrawn advisories; deduplicate remaining IDs. |
@@ -116,11 +130,23 @@ For a versionless check, reuse the default already fetched. For an exact check d
 
 #### 03 Implementation boundary
 
-Share check policy, result types and the process runner across languages. Keep metadata adapters, static manifest readers and native manager integrations separate. Test with provider and manifest fixtures, an injected clock and transport, and native tool stubs.
+Share check policy, result types and the process runner across languages. Keep metadata adapters, static manifest readers and native manager integrations separate. Test with provider and manifest fixtures, an injected clock and transport, and native tool stubs. Use representative provider responses for each required ecosystem. Include Pub retraction and Swift identity and publication-date cases.
 
 Kotlin installation requires bounded declaration editing for supported Gradle root builds and exact version insertion before resolution via the committed wrapper. Swift installation requires a tested SwiftPM sequence that adds and resolves the exact dependency. Verify that any declaration edits preserve unrelated content.
 
 [npm install](https://docs.npmjs.com/cli/install/), [Cargo add](https://doc.rust-lang.org/cargo/commands/cargo-add.html), [uv add](https://docs.astral.sh/uv/reference/cli/#uv-add), [Go get](https://go.dev/ref/mod#go-get), [Gradle dependency declarations](https://docs.gradle.org/current/userguide/declaring_dependencies.html), [SwiftPM add-dependency](https://docs.swift.org/main/documentation/packagemanagerdocs/packageadddependency/), [Dart pub add](https://dart.dev/tools/pub/cmd/pub-add).
+
+Keep direct dependencies to the modules in the recommendations table. Add each when its feature needs it. Reuse CUE for Dart YAML and keep Go, Swift and Gradle declaration handling scoped to the manifest matrix. Review any additional parser against representative fixtures before selecting it.
+
+The GitHub star counts are adoption snapshots. Prefer actively maintained upstreams with over 500 stars. When introducing a module, pin a patched release compatible with the Go toolchain and build targets, check Go and upstream advisories, and scan the resolved direct and transitive dependencies. [Go vulnerability management](https://go.dev/doc/security/vuln/).
+
+#### 10 Recommended Go dependencies
+
+| feature | github_stars_snapshot | official_reference | recommended_package | repository_precedent | upstream_github | why |
+| --- | --- | --- | --- | --- | --- | --- |
+| CLI commands and flags | 44.8k | https://cobra.dev/docs/how-to-guides/working-with-flags/ | github.com/spf13/cobra | Used by gh-flarebyte with pflag | https://github.com/spf13/cobra | Models check, install and list as subcommands. Flag presence preserves explicit zero and distinguishes CLI overrides from defaults. Keep exit-code and stream handling in the CLI adapter. |
+| Project defaults and Dart YAML | 6.3k | https://cuelang.org/docs/concept/how-cue-works-with-go/ | cuelang.org/go | gh-flarebyte uses local text extraction. The sibling Flyb project uses this module. | https://github.com/cue-lang/cue | Validate a single self-contained CUE file against a closed schema. Reuse the same module’s encoding/yaml package for pubspec.yaml and pubspec.lock, with fixture coverage for the supported dependency forms. |
+| TOML manifests and locks | 2.0k | https://github.com/pelletier/go-toml | github.com/pelletier/go-toml/v2 | Used by gh-flarebyte | https://github.com/pelletier/go-toml | One stable v2 decoder covers Python and Cargo manifests and locks plus Gradle version catalogs. CUE’s TOML conversion API is documented as experimental. |
 
 #### 02 Ecosystem mapping
 
@@ -216,14 +242,14 @@ Official installation: https://docs.astral.sh/uv/getting-started/installation/
 #### 01 Shared API flow
 
 1. Resolve the selector and validate the ecosystem's package identity and exact version. Reject option-like names, control characters and unsupported dependency forms.
-2. Without an explicit version, request the adapter's declared default. For deps.dev use GET `/v3/systems/{system}/packages/{name}`. An absent or ambiguous default yields `DEFAULT_UNAVAILABLE`.
-3. Fetch the exact release. For deps.dev use GET `/v3/systems/{system}/packages/{name}/versions/{version}`. A missing release yields `VERSION_UNAVAILABLE`; an identity mismatch yields `METADATA_UNAVAILABLE`. Normalize canonical identity, publication time and available deprecation evidence. Missing deprecation evidence does not establish absence of withdrawal.
-4. Once the release identity is established, query OSV with the canonical ecosystem, name and exact version. Follow pagination within the limits in the rules.
-5. Apply the shared policy. An active applicable advisory or confirmed deprecation yields fail, missing required evidence yields review, and complete clean evidence yields pass. Fail takes precedence over review.
+2. Without an explicit version, request the adapter's declared default. For deps.dev use GET `/v3/systems/{system}/packages/{name}`. A definitive absence or ambiguous default yields `DEFAULT_UNAVAILABLE`. A failed lookup yields `METADATA_UNAVAILABLE` when the default is required.
+3. Fetch the exact release. For deps.dev use GET `/v3/systems/{system}/packages/{name}/versions/{version}`. A definitive provider not-found response for the exact release yields `VERSION_UNAVAILABLE`. Transport errors, unsuccessful responses other than a definitive not-found, malformed metadata and identity mismatches yield `METADATA_UNAVAILABLE`. Normalize canonical identity, publication time and explicit deprecation or retraction evidence.
+4. Once the release identity is established, query OSV with the canonical ecosystem, name and exact version. Follow continuation tokens even on pages with no findings. A query that cannot complete within the limits yields `ADVISORIES_INCOMPLETE`.
+5. Apply the shared policy. An active applicable advisory, confirmed deprecation or confirmed release retraction yields fail, missing required evidence yields review, and complete clean evidence yields pass. Fail takes precedence over review.
 
-Each ecosystem uses one metadata adapter without fallback. Pub uses the hosted pub.dev API. Swift requires verified public repository URL, version, tag and publication mapping. deps.dev covers GO, RUBYGEMS, NPM, CARGO, MAVEN, PYPI and NUGET. OSV coverage alone does not provide release or age evidence. Escape every API path parameter. Use bounded, cancellable requests and report missing required evidence as review.
+Each ecosystem uses one metadata adapter without fallback. Pub uses the hosted pub.dev API and maps an explicit `retracted: true` for the exact release to `RELEASE_RETRACTED`. Report deprecation and retraction only where the adapter has positive evidence. Swift requires verified public repository URL, version, tag and publication mapping. deps.dev covers GO, RUBYGEMS, NPM, CARGO, MAVEN, PYPI and NUGET. OSV coverage alone does not provide release or age evidence. Escape every API path parameter. Use bounded, cancellable requests and report missing required evidence as review.
 
-[deps.dev v3](https://docs.deps.dev/api/v3/), [OSV coverage](https://google.github.io/osv.dev/data/), [OSV exact-version queries](https://google.github.io/osv.dev/post-v1-query/), [Pub metadata API](https://pub.dev/help/api).
+[deps.dev v3](https://docs.deps.dev/api/v3/), [OSV coverage](https://google.github.io/osv.dev/data/), [OSV exact-version queries](https://google.github.io/osv.dev/post-v1-query/), [Pub metadata API](https://pub.dev/help/api), [Pub hosted repository protocol](https://github.com/dart-lang/pub/blob/main/doc/repository-spec-v2.md).
 
 ### 04 Acceptance
 
@@ -232,10 +258,10 @@ Each ecosystem uses one metadata adapter without fallback. Pub uses the hosted p
 | concept | expected | id | scenario |
 | --- | --- | --- | --- |
 | check | Pass with the shared result schema and exit 0 | T01 | Clean mature release for each supported selector |
-| check | Fail takes precedence over review and blocks installation | T02 | Applicable advisory or deprecation, with or without incomplete evidence |
+| check | Fail takes precedence over review and blocks installation | T02 | Applicable advisory, confirmed deprecation or confirmed retraction, with or without incomplete evidence |
 | check | Review normally; zero skips only age rule | T03 | Too young or missing date; zero age option |
 | check | Versionless check reviews with DEFAULT_UNAVAILABLE; exact check evaluates the requested release | T04 | Provider default missing, with and without an explicit version |
-| check | Review; never treat incomplete data as clean | T05 | Timeout, bad JSON, oversized data, OSV token loop or page cap |
+| check | Required metadata failures yield METADATA_UNAVAILABLE; incomplete advisory queries yield ADVISORIES_INCOMPLETE | T05 | Timeout, malformed or oversized response, or OSV pagination failure |
 | check | Withdrawn ignored; active IDs deduplicated and sorted | T06 | Withdrawn and duplicate OSV records across pages |
 | architecture | Provider receives the normalized and encoded identity | T07 | Scoped npm name, PyPI normalization, Go module path and Maven coordinate |
 | install | Exact argv, current directory, inherited stdin and separate raw stdout/stderr; no extra check | T08 | Pass then install with stub executable for each native adapter |
@@ -261,9 +287,12 @@ Each ecosystem uses one metadata adapter without fallback. Pub uses the hosted p
 | list | List only referenced catalog entries; mark unenumerable declarations partial and exit 1; complete empty list exits 0 | T28 | Gradle catalog references, computed Swift declarations and empty manifests |
 | list | Plain list makes no requests; checked list reuses verdicts, age, latest and titles; review rows are retained at exit 1 | T29 | Offline list and list --check with repeated exact releases and unresolved rows |
 | check | Latest is null without changing the verdict; advisory ID remains | T30 | Exact check with unavailable latest metadata or untitled advisory |
-| check | Review and block installation | T31 | Incomplete release or advisory evidence without an advisory or deprecation finding |
+| check | Review and block installation | T31 | Incomplete evidence without an advisory, deprecation or retraction finding |
 | list | List accepts table override; unsupported flag combinations exit 2 | T32 | Configured JSON and explicit table for list; standalone check with table; list age flag without --check |
 | list | Keep all rows; unresolved or unsupported declarations make no requests; provider failure follows the shared verdict contract | T33 | List --check with unsupported source, conflicting lock evidence or failing provider |
+| check | Definitive not-found yields VERSION_UNAVAILABLE; lookup failure yields METADATA_UNAVAILABLE | T34 | Exact release not found versus required metadata endpoint timing out or returning an invalid response |
+| check | RELEASE_RETRACTED yields fail and blocks installation; absent retraction evidence does not emit the code | T35 | Exact Pub release is retracted, with or without an incomplete advisory query |
+| check | Continue until completion; a later active finding yields fail; an unfinished query yields review in the absence of a fail reason | T36 | OSV page contains no findings and carries a continuation token |
 
 ### 05 Scope boundaries
 

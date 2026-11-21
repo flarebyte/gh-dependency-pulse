@@ -1,0 +1,13 @@
+code,scope,verdict,trigger
+ADVISORY_FOUND,shared,fail,A known applicable advisory has not been withdrawn.
+RELEASE_DEPRECATED,shared,fail,The metadata provider confirms the checked release is deprecated.
+RELEASE_RETRACTED,shared,fail,The metadata provider explicitly marks the exact release as retracted.
+VERSION_UNAVAILABLE,shared,review,The provider definitively reports that it does not have the exact release.
+DEFAULT_UNAVAILABLE,shared,review,A conclusive provider response establishes no unambiguous default for a versionless check.
+AGE_UNKNOWN,shared,review,The age rule requires a publication date and none is available.
+RELEASE_TOO_YOUNG,shared,review,The release is younger than the configured minimum age.
+PUBLICATION_IN_FUTURE,shared,review,The provider reports a publication date after the check time.
+METADATA_UNAVAILABLE,shared,review,A required metadata lookup fails or returns malformed or conflicting release data.
+ADVISORIES_INCOMPLETE,shared,review,The advisory query did not return a complete result.
+EXACT_VERSION_UNKNOWN,list-only,review,The declaration has no unambiguous exact version to check.
+UNSUPPORTED_SOURCE,list-only,review,The declaration does not identify a supported public package source.
